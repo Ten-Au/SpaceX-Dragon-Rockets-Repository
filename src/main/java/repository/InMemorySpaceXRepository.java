@@ -130,6 +130,16 @@ public class InMemorySpaceXRepository implements SpaceXRepository {
         return sb;
     }
 
+    @Override
+    public synchronized Optional<Rocket> findRocket(String name) {
+        return Optional.ofNullable(rockets.get(name));
+    }
+
+    @Override
+    public synchronized Optional<Mission> findMission(String name) {
+        return Optional.ofNullable(missions.get(name));
+    }
+
     private Rocket getRocketOrThrow(String name) {
         if (!rockets.containsKey(name)) throw new IllegalArgumentException("Rocket not found: " + name);
         return rockets.get(name);

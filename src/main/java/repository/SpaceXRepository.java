@@ -5,6 +5,7 @@ import model.mission.MissionStatus;
 import model.rocket.Rocket;
 import model.rocket.RocketStatus;
 
+import java.util.Optional;
 import java.util.Set;
 
 public interface SpaceXRepository {
@@ -18,4 +19,7 @@ public interface SpaceXRepository {
     void changeMissionStatus(String missionName, MissionStatus newStatus);
 
     String getSummary();
+
+    Optional<Rocket> findRocket(String name);
+    Optional<Mission> findMission(String name);
 }
