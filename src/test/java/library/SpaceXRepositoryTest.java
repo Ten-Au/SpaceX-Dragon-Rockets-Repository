@@ -1,11 +1,7 @@
-import library.Mission;
-import library.MissionStatus;
-import library.Rocket;
-import library.RocketStatus;
+package library;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import library.InMemorySpaceXRepository;
-import library.SpaceXRepository;
 
 import java.util.Optional;
 import java.util.Set;
@@ -62,6 +58,14 @@ class SpaceXRepositoryTest {
     }
 
     @Test
+    @DisplayName("Should throw exception when creating Rocket with invalid name")
+    void givenInvalidName_whenCreateRocket_thenThrowException() {
+        assertThrows(IllegalArgumentException.class, () -> new Rocket(null));
+        assertThrows(IllegalArgumentException.class, () -> new Rocket(""));
+        assertThrows(IllegalArgumentException.class, () -> new Rocket("  "));
+    }
+
+    @Test
     @DisplayName("Should successfully add a new mission and find it with initial status 'Scheduled'")
     void givenNewMission_whenAddMission_thenFoundScheduled() {
         // Given
@@ -90,11 +94,18 @@ class SpaceXRepositoryTest {
         Rocket rocket = repository.findRocket("Falcon 9").get();
         Mission mission = repository.findMission("Mars").get();
         
-         assertEquals(RocketStatus.IN_SPACE, rocket.getStatus(), "Rocket should be IN_SPACE");
+        assertEquals(RocketStatus.IN_SPACE, rocket.getStatus(), "Rocket should be IN_SPACE");
         assertEquals("Mars", rocket.getMissionName(), "Rocket should be linked to mission");
         
-         assertEquals(MissionStatus.IN_PROGRESS, mission.getStatus(), "Mission should be IN_PROGRESS");
+        assertEquals(MissionStatus.IN_PROGRESS, mission.getStatus(), "Mission should be IN_PROGRESS");
         assertEquals(1, mission.getRocketCount(), "Mission should have 1 rocket assigned");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when creating Mission with invalid name")
+    void givenInvalidName_whenCreateMission_thenThrowException() {
+        assertThrows(IllegalArgumentException.class, () -> new Mission(null));
+        assertThrows(IllegalArgumentException.class, () -> new Mission(""));
     }
 
     @Test
@@ -118,6 +129,23 @@ class SpaceXRepositoryTest {
 
         Rocket r1 = repository.findRocket("R1").get();
         assertEquals(RocketStatus.ON_GROUND, r1.getStatus(), "Rocket R1 should remain ON_GROUND");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when assigning a rocket that is already assigned")
+    void givenAssignedRocket_whenAssignAgain_thenThrowException() {
+        // Given
+        repository.addRocket(new Rocket("Falcon 9"));
+        repository.addMission(new Mission("Mars"));
+        repository.addMission(new Mission("Luna"));
+
+        // Assign to Mars first (Success)
+        repository.assignRocketToMission("Falcon 9", "Mars");
+
+        // When
+        assertThrows(IllegalStateException.class, () -> {
+            repository.assignRocketToMission("Falcon 9", "Luna");
+        }, "Should not allow double assignment");
     }
 
     @Test
@@ -232,6 +260,70 @@ class SpaceXRepositoryTest {
         assertThrows(IllegalStateException.class, () -> {
             repository.changeMissionStatus("Mars", MissionStatus.SCHEDULED);
         }, "Should not allow status changes on an Ended mission");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when setting PENDING status with no broken rockets")
+    void givenHealthyMission_whenSetPending_thenThrowException() {
+        repository.addMission(new Mission("Mars"));
+        repository.addRocket(new Rocket("R1"));
+        repository.assignRocketToMission("R1", "Mars");
+
+        assertThrows(IllegalStateException.class, () -> {
+            repository.changeMissionStatus("Mars", MissionStatus.PENDING);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw exception when setting IN_PROGRESS status with no rockets")
+    void givenEmptyMission_whenSetInProgress_thenThrowException() {
+        repository.addMission(new Mission("Mars"));
+
+        assertThrows(IllegalStateException.class, () -> {
+            repository.changeMissionStatus("Mars", MissionStatus.IN_PROGRESS);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw exception when reverting to SCHEDULED if rockets are assigned")
+    void givenMissionWithRockets_whenSetScheduled_thenThrowException() {
+        repository.addMission(new Mission("Mars"));
+        repository.addRocket(new Rocket("R1"));
+        repository.assignRocketToMission("R1", "Mars");
+
+        assertThrows(IllegalStateException.class, () -> {
+            repository.changeMissionStatus("Mars", MissionStatus.SCHEDULED);
+        });
+    }
+
+    @Test
+    @DisplayName("Should throw exception during bulk assignment if a rocket is already assigned")
+    void givenBatchWithAssignedRocket_whenAssignRockets_thenThrowException() {
+        repository.addRocket(new Rocket("R1"));
+        repository.addRocket(new Rocket("R2"));
+        repository.addMission(new Mission("Mars"));
+        repository.addMission(new Mission("Luna"));
+
+        repository.assignRocketToMission("R1", "Mars");
+
+        Set<String> batch = Set.of("R1", "R2");
+
+        assertThrows(IllegalStateException.class, () -> {
+            repository.assignRocketsToMission("Luna", batch);
+        }, "Should fail because R1 is already assigned");
+    }
+
+    @Test
+    @DisplayName("Should throw exception when setting IN_PROGRESS if a rocket is BROKEN")
+    void givenMissionWithBrokenRocket_whenSetInProgress_thenThrowException() {
+        repository.addMission(new Mission("Mars"));
+        repository.addRocket(new Rocket("R1"));
+        repository.assignRocketToMission("R1", "Mars");
+        repository.changeRocketStatus("R1", RocketStatus.IN_REPAIR);
+
+        assertThrows(IllegalStateException.class, () -> {
+            repository.changeMissionStatus("Mars", MissionStatus.IN_PROGRESS);
+        });
     }
     
     @Test

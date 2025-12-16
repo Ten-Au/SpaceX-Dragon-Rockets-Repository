@@ -51,12 +51,4 @@ public class Rocket {
         this.status = newStatus;
     }
 
-    @Override
-    public String toString() {
-        return "Rocket{" +
-                "name='" + name + '\'' +
-                ", status=" + status +
-                ", mission='" + missionName + '\'' +
-                '}';
-    }
 }

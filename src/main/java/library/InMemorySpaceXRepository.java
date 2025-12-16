@@ -191,9 +191,6 @@ public class InMemorySpaceXRepository implements SpaceXRepository {
                     throw new IllegalStateException("Cannot set to IN_PROGRESS. One or more rockets are IN_REPAIR.");
                 }
                 break;
-
-            default:
-                throw new IllegalArgumentException("Unsupported status: " + newStatus);
         }
     }
 
