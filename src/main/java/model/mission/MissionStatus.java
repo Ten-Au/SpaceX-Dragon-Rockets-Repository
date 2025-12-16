@@ -1,4 +1,4 @@
-package models;
+package model.mission;
 
 public enum MissionStatus {
     SCHEDULED,

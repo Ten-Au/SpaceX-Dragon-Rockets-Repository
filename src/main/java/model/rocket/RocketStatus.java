@@ -1,4 +1,4 @@
-package models;
+package model.rocket;
 
 public enum RocketStatus {
     ON_GROUND,
