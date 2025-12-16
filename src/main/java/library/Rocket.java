@@ -1,6 +1,4 @@
-package model.rocket;
-
-import java.util.Objects;
+package library;
 
 public class Rocket {
     private final String name;
@@ -28,7 +26,7 @@ public class Rocket {
         return missionName;
     }
 
-    public void assignToMission(String missionName) {
+    void assignToMission(String missionName) {
         if (missionName == null || missionName.isBlank()) {
             throw new IllegalArgumentException("Mission name cannot be null");
         }
@@ -41,12 +39,12 @@ public class Rocket {
         this.status = RocketStatus.IN_SPACE;
     }
 
-    public void unassign() {
+    void unassign() {
         this.missionName = null;
         this.status = RocketStatus.ON_GROUND;
     }
 
-    public void setStatus(RocketStatus newStatus) {
+    void setStatus(RocketStatus newStatus) {
         if (newStatus == RocketStatus.ON_GROUND && this.missionName != null) {
             throw new IllegalStateException("Cannot set to ON_GROUND while assigned to a mission.");
         }

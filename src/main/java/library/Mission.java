@@ -1,6 +1,4 @@
-package model.mission;
-
-import model.rocket.Rocket;
+package library;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -28,7 +26,7 @@ public class Mission {
         return status;
     }
 
-    public void assignRocket(Rocket rocket) {
+    void assignRocket(Rocket rocket) {
         if (rocket == null) {
             throw new IllegalArgumentException("Cannot assign null rocket");
         }
@@ -38,7 +36,7 @@ public class Mission {
         assignedRockets.add(rocket);
     }
 
-    public void unassignAllRockets() {
+    void unassignAllRockets() {
         this.assignedRockets.clear();
     }
 
@@ -50,7 +48,7 @@ public class Mission {
         return Collections.unmodifiableSet(assignedRockets);
     }
 
-    public void setStatus(MissionStatus newStatus) {
+    void setStatus(MissionStatus newStatus) {
         if (newStatus == null) {
             throw new IllegalArgumentException("Status cannot be null");
         }
