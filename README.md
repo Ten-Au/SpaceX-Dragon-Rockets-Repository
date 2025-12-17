@@ -70,7 +70,7 @@ To scale this library to a larger distributed system, the following improvements
 
 ```java
 // 1. Initialize
-SpaceXRepository repo = new SpaceXInMemoryRepository();
+SpaceXRepository repo = new InMemorySpaceXRepository();
 
 // 2. Add Data
 repo.addRocket(new Rocket("Falcon 9"));
